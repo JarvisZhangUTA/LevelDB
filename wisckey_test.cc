@@ -15,7 +15,7 @@ wisckey_get(WK * wk, string &key, string &value)
 {
 
   string val; // address (offset \n length)
-  const bool found = lldb_get(wk->leveldb, key, val);
+  const bool found = leveldb_get(wk->leveldb, key, val);
 
   if(!found) {
     return found;
@@ -38,10 +38,10 @@ wisckey_set(WK * wk, string &key, string &value)
   // generate address (offset \n length)
   int size = value.size();
   stringstream stream;
-  stream << wk->offest << "\n" << size;
+  stream << wk->offset << "\n" << size;
 
   // Save key-address to level-db
-  lldb_set(wk->leveldb, key, stream.str());
+  leveldb_set(wk->leveldb, key, stream.str());
 
   // Save content to logfile
   fputs(value, wk->logfile);
@@ -49,15 +49,15 @@ wisckey_set(WK * wk, string &key, string &value)
   // Change offset
   wk->offset += size;
 
-  count << key << ' saved' << endl;
+  cout << key << " saved" << endl;
 }
 
   static void
 wisckey_del(WK * wk, string &key)
 {
-  lldb_del(wk->leveldb, key);
+  leveldb_del(wk->leveldb, key);
 
-  count << key << ' deleted' << endl;
+  cout << key << " deleted" << endl;
 }
 
   static WK *
@@ -68,7 +68,7 @@ open_wisckey(const string& dirname)
   wk->dir = dirname;
   
   //create logfile
-  wk->logfile = fopen('logfile.txt','wb');
+  wk->logfile = fopen("logfile.txt","wb");
   wk->offset = 0;
 
   return wk;
@@ -80,7 +80,7 @@ close_wisckey(WK * wk)
   delete wk->leveldb;
   // flush and close logfile
   wk->logfile->close();
-  remove('logfile.txt');
+  remove("logfile.txt");
   delete wk;
 }
 
