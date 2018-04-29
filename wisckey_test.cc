@@ -25,10 +25,8 @@ wisckey_get(WK * wk, string &key, string &value)
   int offset = stoi( val.substr(0, pos) );
   int length = stoi( val.substr(pos) );
 
-  char* chr;
-  fgets(chr, offset + length, wk->logfile);
-
-  string res = string(chr);
+  string res;
+  res << wk->logfile;
   value = res.substr(offset, length);
 
   return found;
@@ -47,8 +45,8 @@ wisckey_set(WK * wk, string &key, string &value)
   leveldb_set(wk->leveldb, key, val);
 
   // Save content to logfile
-  char* chr = value.c_str();
-  fputs(chr, wk->logfile);
+  
+  wk->logfile << value;
 
   // Change offset
   wk->offset += size;
