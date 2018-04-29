@@ -27,7 +27,7 @@ wisckey_get(WK * wk, string &key, string &value)
 
   char* chr;
   fgets(chr, offset + length, wk->logfile);
-  
+
   string res = string(chr);
   value = res.substr(offset, length);
 
@@ -47,7 +47,7 @@ wisckey_set(WK * wk, string &key, string &value)
   leveldb_set(wk->leveldb, key, val);
 
   // Save content to logfile
-  char* chr = value;
+  char* chr = value.c_str();
   fputs(chr, wk->logfile);
 
   // Change offset
@@ -83,7 +83,7 @@ close_wisckey(WK * wk)
 {
   delete wk->leveldb;
   // flush and close logfile
-  close( wk->logfile );
+  wk->logfile.close();
   remove("logfile.txt");
   delete wk;
 }
