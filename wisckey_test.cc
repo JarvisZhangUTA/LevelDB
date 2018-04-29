@@ -40,8 +40,9 @@ wisckey_set(WK * wk, string &key, string &value)
   stringstream stream;
   stream << wk->offset << "\n" << size;
 
+  string val = stream.str();
   // Save key-address to level-db
-  leveldb_set(wk->leveldb, key, stream.str());
+  leveldb_set(wk->leveldb, key, val);
 
   // Save content to logfile
   fputs(value, wk->logfile);
