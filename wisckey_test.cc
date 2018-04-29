@@ -5,6 +5,7 @@ typedef struct WiscKey {
   DB * leveldb;
   FILE * logfile;
   //TODO: add more as you need
+  int offset;
 } WK;
 
 // TODO: add more helper functions as you need
@@ -12,19 +13,51 @@ typedef struct WiscKey {
   static bool
 wisckey_get(WK * wk, string &key, string &value)
 {
-  //TODO: Your code here
+
+  string val; // address (offset \n length)
+  const bool found = lldb_get(wk->leveldb, key, val);
+
+  if(!found) {
+    return found;
+  }
+
+  int pos = val.find("\n");
+  int offset = stoi( val.substr(0, pos) );
+  int length = stoi( val.substr(pos) );
+
+  string res;
+  fgets(res, offset + length, wk->logfile);
+  value = res.substr(offset, length);
+
+  return found;
 }
 
   static void
 wisckey_set(WK * wk, string &key, string &value)
 {
-  //TODO: Your code here
+  // generate address (offset \n length)
+  int size = value.size();
+  stringstream stream;
+  stream << wk->offest << "\n" << size;
+
+  // Save key-address to level-db
+  lldb_set(wk->leveldb, key, stream.str());
+
+  // Save content to logfile
+  fputs(value, wk->logfile);
+
+  // Change offset
+  wk->offset += size;
+
+  count << key << ' saved' << endl;
 }
 
   static void
 wisckey_del(WK * wk, string &key)
 {
-  //TODO: Your code here
+  lldb_del(wk->leveldb, key);
+
+  count << key << ' deleted' << endl;
 }
 
   static WK *
@@ -33,7 +66,11 @@ open_wisckey(const string& dirname)
   WK * wk = new WK;
   wk->leveldb = open_leveldb(dirname);
   wk->dir = dirname;
-  //TODO: Your code here: logfile
+  
+  //create logfile
+  wk->logfile = fopen('logfile.txt','wb');
+  wk->offset = 0;
+
   return wk;
 }
 
@@ -41,8 +78,9 @@ open_wisckey(const string& dirname)
 close_wisckey(WK * wk)
 {
   delete wk->leveldb;
-  // TODO: Your code here
   // flush and close logfile
+  wk->logfile->close();
+  remove('logfile.txt');
   delete wk;
 }
 
